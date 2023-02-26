@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "AbilitySystemComponent.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -18,7 +19,7 @@ APracticeUnrealGASCharacter::APracticeUnrealGASCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -49,6 +50,8 @@ APracticeUnrealGASCharacter::APracticeUnrealGASCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	CharacterAbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("CharacterAbilitySystem"));
 }
 
 void APracticeUnrealGASCharacter::BeginPlay()
@@ -72,20 +75,35 @@ void APracticeUnrealGASCharacter::BeginPlay()
 void APracticeUnrealGASCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
-		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APracticeUnrealGASCharacter::Move);
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APracticeUnrealGASCharacter::Look);
 
-	}
+		//Jumping
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APracticeUnrealGASCharacter::StartJump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &APracticeUnrealGASCharacter::StopJump);
 
+		//Attack
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APracticeUnrealGASCharacter::StartAttack);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &APracticeUnrealGASCharacter::StopAttack);
+
+		//Guard
+		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Triggered, this, &APracticeUnrealGASCharacter::StartGuard);
+		EnhancedInputComponent->BindAction(GuardAction, ETriggerEvent::Completed, this, &APracticeUnrealGASCharacter::StopGuard);
+
+		//Spell
+		EnhancedInputComponent->BindAction(SpellAction, ETriggerEvent::Triggered, this, &APracticeUnrealGASCharacter::StartSpell);
+		EnhancedInputComponent->BindAction(SpellAction, ETriggerEvent::Completed, this, &APracticeUnrealGASCharacter::StopSpell);
+	}
+}
+
+UAbilitySystemComponent* APracticeUnrealGASCharacter::GetAbilitySystemComponent() const
+{
+	return CharacterAbilitySystem;
 }
 
 void APracticeUnrealGASCharacter::Move(const FInputActionValue& Value)
@@ -122,6 +140,46 @@ void APracticeUnrealGASCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void APracticeUnrealGASCharacter::StartJump(const FInputActionValue& Value)
+{
+	Super::Jump();
+}
+
+void APracticeUnrealGASCharacter::StopJump(const FInputActionValue& Value)
+{
+	Super::StopJumping();
+}
+
+void APracticeUnrealGASCharacter::StartAttack(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartAttack"));
+}
+
+void APracticeUnrealGASCharacter::StopAttack(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopAttack"));
+}
+
+void APracticeUnrealGASCharacter::StartGuard(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartGuard"));
+}
+
+void APracticeUnrealGASCharacter::StopGuard(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopGuard"));
+}
+
+void APracticeUnrealGASCharacter::StartSpell(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartSpell"));
+}
+
+void APracticeUnrealGASCharacter::StopSpell(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopSpell"));
 }
 
 
