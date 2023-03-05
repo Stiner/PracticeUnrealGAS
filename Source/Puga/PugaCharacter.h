@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright by Stiner. All Rights Reserved.
 
 #pragma once
 
@@ -6,11 +6,11 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "AbilitySystemInterface.h"
-#include "PracticeUnrealGASCharacter.generated.h"
+#include "PugaCharacter.generated.h"
 
 
 UCLASS(config=Game)
-class APracticeUnrealGASCharacter : public ACharacter, public IAbilitySystemInterface
+class PUGA_API APugaCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -55,7 +55,7 @@ protected:
 	class UInputAction* SpellAction;
 
 public:
-	APracticeUnrealGASCharacter();
+	APugaCharacter();
 
 protected:
 	/** Called for movement input */

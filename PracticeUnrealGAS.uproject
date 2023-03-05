@@ -5,11 +5,12 @@
 	"Description": "",
 	"Modules": [
 		{
-			"Name": "PracticeUnrealGAS",
+			"Name": "Puga",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"GameplayAbilities"
+				"GameplayAbilities",
+				"Engine"
 			]
 		}
 	],

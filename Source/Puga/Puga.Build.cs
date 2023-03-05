@@ -1,10 +1,10 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright by Stiner. All Rights Reserved.
 
 using UnrealBuildTool;
 
-public class PracticeUnrealGAS : ModuleRules
+public class Puga : ModuleRules
 {
-	public PracticeUnrealGAS(ReadOnlyTargetRules Target) : base(Target)
+	public Puga(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
