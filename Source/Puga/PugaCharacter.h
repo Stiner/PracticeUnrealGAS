@@ -24,7 +24,7 @@ protected:
 	class UCameraComponent* FollowCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character Ability")
-	class UAbilitySystemComponent* CharacterAbilitySystem;
+	class UAbilitySystemComponent* AbilitySystemComponent;
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -54,10 +54,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* SpellAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Ability")
+	TObjectPtr<class UGameplayAbilitySet> GameplayAbilitySet;
+
 public:
 	APugaCharacter();
 
+public:
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
 protected:
+	virtual void BeginPlay() override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SetupInputForAbilitySystem(class UInputComponent* PlayerInputComponent);
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 	/** Called for looking input */
@@ -74,14 +88,4 @@ protected:
 	/** Called for spell input */
 	void StartSpell(const FInputActionValue& Value);
 	void StopSpell(const FInputActionValue& Value);
-
-protected:
-	virtual void BeginPlay() override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-public:
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 };
-

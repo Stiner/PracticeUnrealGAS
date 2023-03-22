@@ -10,10 +10,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "AbilitySystemComponent.h"
+#include "GameplayAbilitySet.h"
 
-
-//////////////////////////////////////////////////////////////////////////
-// APugaCharacter
 
 APugaCharacter::APugaCharacter()
 {
@@ -51,7 +49,12 @@ APugaCharacter::APugaCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	CharacterAbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("CharacterAbilitySystem"));
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
+}
+
+UAbilitySystemComponent* APugaCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 void APugaCharacter::BeginPlay()
@@ -68,9 +71,6 @@ void APugaCharacter::BeginPlay()
 		}
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////
-// Input
 
 void APugaCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
@@ -99,11 +99,48 @@ void APugaCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(SpellAction, ETriggerEvent::Triggered, this, &APugaCharacter::StartSpell);
 		EnhancedInputComponent->BindAction(SpellAction, ETriggerEvent::Completed, this, &APugaCharacter::StopSpell);
 	}
+
+	SetupInputForAbilitySystem(PlayerInputComponent);
 }
 
-UAbilitySystemComponent* APugaCharacter::GetAbilitySystemComponent() const
+void APugaCharacter::SetupInputForAbilitySystem(UInputComponent* PlayerInputComponent)
 {
-	return CharacterAbilitySystem;
+	AbilitySystemComponent->BindToInputComponent(PlayerInputComponent);
+
+	if (!GameplayAbilitySet)
+	{
+		UE_LOG(LogTemp, Log, TEXT("[APugaCharacter] AbilitSet is null."));
+		return;
+	}
+
+	for (const FGameplayAbilityBindInfo& BindInfo : GameplayAbilitySet->Abilities)
+	{
+		FGameplayAbilitySpec Spec
+		(
+			/*Ability*/ BindInfo.GameplayAbilityClass->GetDefaultObject<UGameplayAbility>(),
+			/*Level  */ 1,
+			/*InputID*/ static_cast<int32>(BindInfo.Command)
+		);
+
+		FGameplayAbilitySpecHandle AbilityHandle = AbilitySystemComponent->GiveAbility(Spec);
+
+		int32 AbilityID = static_cast<int32>(BindInfo.Command);
+
+		UClass::TryFindTypeSlowSafe<UEnum>("EGameplayAbilityInputBinds");
+
+		FGameplayAbilityInputBinds InputBinds
+		(
+			/*ConfirmTargetCommand*/ FString::Printf(TEXT("ConfirmTargetting_%s_%s"), *GetName(), *(BindInfo.GameplayAbilityClass->GetName())),
+			/*CancelTargetCommand */ FString::Printf(TEXT("CancelTargetting_%s_%s"), *GetName(), *(BindInfo.GameplayAbilityClass->GetName())),
+			/*EnumPathName        */ FTopLevelAssetPath(FString(TEXT("/Script/GameplayAbilities.EGameplayAbilityInputBinds"))),
+			/*ConfirmTargetInputID*/ AbilityID,
+			/*CancelTargetInputID */ AbilityID
+		);
+
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, InputBinds);
+
+		AbilitySystemComponent->TryActivateAbility(AbilityHandle, 1);
+	}
 }
 
 void APugaCharacter::Move(const FInputActionValue& Value)
