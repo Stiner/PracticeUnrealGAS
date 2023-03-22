@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayAbilitySet.h"
+#include "AttributeSet/CharacterAttributeSet.h"
 
 
 APugaCharacter::APugaCharacter()
@@ -55,6 +56,54 @@ APugaCharacter::APugaCharacter()
 UAbilitySystemComponent* APugaCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+UGameplayEffect* ConstructGameplayEffect(const FString& name)
+{
+	return NewObject<UGameplayEffect>(GetTransientPackage(), FName(*name));
+}
+
+FGameplayModifierInfo& AddModifier(UGameplayEffect* Effect, FProperty* Property, EGameplayModOp::Type Op, const FGameplayEffectModifierMagnitude& Magnitude)
+{
+	int32 index = Effect->Modifiers.Num();
+	Effect->Modifiers.SetNum(index + 1);
+
+	FGameplayModifierInfo& Info = Effect->Modifiers[index];
+	Info.ModifierMagnitude = Magnitude;
+	Info.ModifierOp = Op;
+	Info.Attribute.SetUProperty(Property);
+
+	return Info;
+}
+
+void APugaCharacter::TestGameplayEffect()
+{
+	UGameplayEffect* GameplayEffect = ConstructGameplayEffect("RecoverHP");
+
+	FProperty* hpProperty = FindFieldChecked<FProperty>(UCharacterAttributeSet::StaticClass(), GET_MEMBER_NAME_CHECKED(UCharacterAttributeSet, Hp));
+
+	// hpProperty에 +50 더하기
+	AddModifier(GameplayEffect, hpProperty, EGameplayModOp::Additive, FScalableFloat(50.f));
+
+	// 고정 10초 동안
+	GameplayEffect->DurationPolicy        = EGameplayEffectDurationType::HasDuration;
+	GameplayEffect->DurationMagnitude     = FScalableFloat(10.f);
+	// 0.5초 주기마다
+	GameplayEffect->Period                = 1.0f;
+	// 100$ 확율로
+	GameplayEffect->ChanceToApplyToTarget = 1.f;
+
+	FActiveGameplayEffectHandle recoverHpEffectHandle = AbilitySystemComponent->ApplyGameplayEffectToTarget(GameplayEffect, AbilitySystemComponent, 1.f);
+
+	FOnActiveGameplayEffectRemoved_Info* ep = AbilitySystemComponent->OnGameplayEffectRemoved_InfoDelegate(recoverHpEffectHandle);
+	if (ep)
+	{
+		ep->AddLambda([](const FGameplayEffectRemovalInfo& info)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Magenta, TEXT("Recover effect has been removed."));
+			});
+	}
+	
 }
 
 void APugaCharacter::BeginPlay()
@@ -103,6 +152,26 @@ void APugaCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 	SetupInputForAbilitySystem(PlayerInputComponent);
 }
 
+void APugaCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitStats(UCharacterAttributeSet::StaticClass(), nullptr);
+	}
+}
+
+void APugaCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	const UCharacterAttributeSet* AttributeSet = Cast<UCharacterAttributeSet>(AbilitySystemComponent->GetAttributeSet(UCharacterAttributeSet::StaticClass()));
+
+	FString msg = AttributeSet ? FString::Printf(TEXT("HP:%f"), AttributeSet->Hp) : TEXT("HP:NULL");
+	GEngine->AddOnScreenDebugMessage(-2, 0.1f, FColor::Cyan, msg);
+}
+
 void APugaCharacter::SetupInputForAbilitySystem(UInputComponent* PlayerInputComponent)
 {
 	AbilitySystemComponent->BindToInputComponent(PlayerInputComponent);
@@ -124,9 +193,13 @@ void APugaCharacter::SetupInputForAbilitySystem(UInputComponent* PlayerInputComp
 
 		FGameplayAbilitySpecHandle AbilityHandle = AbilitySystemComponent->GiveAbility(Spec);
 
+		//--------------------------------------------------------------------------------
+		// 구 입력 시스템으로는 아래의 코드가 동작 하지만,
+		// 향상된 입력 시스템으로는 안됨.
+		// AbilitySet에 Enum이 아닌 InputAction 에셋으로 해서 바인딩 해야 할 듯.
+		// Lyra 참고.
+		//--------------------------------------------------------------------------------
 		int32 AbilityID = static_cast<int32>(BindInfo.Command);
-
-		UClass::TryFindTypeSlowSafe<UEnum>("EGameplayAbilityInputBinds");
 
 		FGameplayAbilityInputBinds InputBinds
 		(
@@ -138,8 +211,9 @@ void APugaCharacter::SetupInputForAbilitySystem(UInputComponent* PlayerInputComp
 		);
 
 		AbilitySystemComponent->BindAbilityActivationToInputComponent(PlayerInputComponent, InputBinds);
+		//--------------------------------------------------------------------------------
 
-		AbilitySystemComponent->TryActivateAbility(AbilityHandle, 1);
+		AbilitySystemComponent->TryActivateAbility(AbilityHandle);
 	}
 }
 
@@ -191,34 +265,32 @@ void APugaCharacter::StopJump(const FInputActionValue& Value)
 
 void APugaCharacter::StartAttack(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartAttack"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartAttack"));
 }
 
 void APugaCharacter::StopAttack(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopAttack"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopAttack"));
 }
 
 void APugaCharacter::StartGuard(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartGuard"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartGuard"));
 }
 
 void APugaCharacter::StopGuard(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopGuard"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopGuard"));
+	FGameplayAttribute f;
 }
 
 void APugaCharacter::StartSpell(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartSpell"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StartSpell"));
 }
 
 void APugaCharacter::StopSpell(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopSpell"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopSpell"));
+	TestGameplayEffect();
 }
-
-
-
-

@@ -66,9 +66,15 @@ public:
 
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	void TestGameplayEffect();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void PostInitializeComponents() override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	void SetupInputForAbilitySystem(class UInputComponent* PlayerInputComponent);
 
