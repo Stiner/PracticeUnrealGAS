@@ -8,6 +8,8 @@ public class Puga : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		PrivateIncludePaths.Add("Puga");
+
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core",

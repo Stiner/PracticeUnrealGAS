@@ -76,7 +76,7 @@ FGameplayModifierInfo& AddModifier(UGameplayEffect* Effect, FProperty* Property,
 	return Info;
 }
 
-void APugaCharacter::TestGameplayEffect()
+void TestGameplayEffect(UAbilitySystemComponent* AbilitySystemComponent)
 {
 	UGameplayEffect* GameplayEffect = ConstructGameplayEffect("RecoverHP");
 
@@ -103,7 +103,6 @@ void APugaCharacter::TestGameplayEffect()
 				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Magenta, TEXT("Recover effect has been removed."));
 			});
 	}
-	
 }
 
 void APugaCharacter::BeginPlay()
@@ -160,16 +159,6 @@ void APugaCharacter::PostInitializeComponents()
 	{
 		AbilitySystemComponent->InitStats(UCharacterAttributeSet::StaticClass(), nullptr);
 	}
-}
-
-void APugaCharacter::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	const UCharacterAttributeSet* AttributeSet = Cast<UCharacterAttributeSet>(AbilitySystemComponent->GetAttributeSet(UCharacterAttributeSet::StaticClass()));
-
-	FString msg = AttributeSet ? FString::Printf(TEXT("HP:%f"), AttributeSet->Hp) : TEXT("HP:NULL");
-	GEngine->AddOnScreenDebugMessage(-2, 0.1f, FColor::Cyan, msg);
 }
 
 void APugaCharacter::SetupInputForAbilitySystem(UInputComponent* PlayerInputComponent)
@@ -281,7 +270,6 @@ void APugaCharacter::StartGuard(const FInputActionValue& Value)
 void APugaCharacter::StopGuard(const FInputActionValue& Value)
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopGuard"));
-	FGameplayAttribute f;
 }
 
 void APugaCharacter::StartSpell(const FInputActionValue& Value)
@@ -292,5 +280,4 @@ void APugaCharacter::StartSpell(const FInputActionValue& Value)
 void APugaCharacter::StopSpell(const FInputActionValue& Value)
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("StopSpell"));
-	TestGameplayEffect();
 }
