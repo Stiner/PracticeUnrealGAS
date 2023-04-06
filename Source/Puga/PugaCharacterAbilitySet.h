@@ -6,22 +6,23 @@
 #include "Engine/DataAsset.h"
 #include "PugaCharacterAbilitySet.generated.h"
 
-
-
 /**
- * ÀÔ·Â°ú AbilityÀÇ Binding
+ * ì…ë ¥ê³¼ Abilityì˜ Binding
  */
 USTRUCT()
 struct FPugaCharacterAbilityBindInfo
 {
 	GENERATED_USTRUCT_BODY()
 
+	UPROPERTY(EditDefaultsOnly, Category = BindInfo)
+	TObjectPtr<class UInputAction> InputAction;
+	
 	UPROPERTY(EditAnywhere, Category = BindInfo)
-	TSubclassOf<class UGameplayAbility> GameplayAbilityClass;
+	TSubclassOf<class UPugaCharacterAbility> GameplayAbilityClass;
 };
 
 /**
- * Ä³¸¯ÅÍ¿¡ ºÎ¿©ÇÒ Ability ¸ğÀ½
+ * ìºë¦­í„°ì— ë¶€ì—¬í•  Ability ëª¨ìŒ
  */
 UCLASS()
 class PUGA_API UPugaCharacterAbilitySet : public UDataAsset
@@ -29,7 +30,7 @@ class PUGA_API UPugaCharacterAbilitySet : public UDataAsset
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, Category = AbilitySet)
-	TArray<FPugaCharacterAbilityBindInfo>	Abilities;
+	TArray<FPugaCharacterAbilityBindInfo> BindInfos;
 
 public:
 	void GiveAbilities(class UAbilitySystemComponent* AbilitySystemComponent) const;
