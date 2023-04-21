@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayAbilities/PugaGameplayAbility.h"
+#include "PugaGameplayAbility.h"
 #include "PugaCharacterAbility.generated.h"
 
 /**

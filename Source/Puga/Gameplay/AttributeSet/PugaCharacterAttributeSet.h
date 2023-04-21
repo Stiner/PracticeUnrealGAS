@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "AttributeSet.h"
-#include "CharacterAttributeSet.generated.h"
+#include "PugaCharacterAttributeSet.generated.h"
 
 /**
  * 캐릭터 능력치
  */
 UCLASS()
-class PUGA_API UCharacterAttributeSet : public UAttributeSet
+class PUGA_API UPugaCharacterAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 	

@@ -11,7 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayAbilitySet.h"
-#include "AttributeSet/CharacterAttributeSet.h"
+#include "PugaCharacterAttributeSet.h"
 
 
 APugaCharacter::APugaCharacter()
@@ -80,7 +80,7 @@ void TestGameplayEffect(UAbilitySystemComponent* AbilitySystemComponent)
 {
 	UGameplayEffect* GameplayEffect = ConstructGameplayEffect("RecoverHP");
 
-	FProperty* hpProperty = FindFieldChecked<FProperty>(UCharacterAttributeSet::StaticClass(), GET_MEMBER_NAME_CHECKED(UCharacterAttributeSet, Hp));
+	FProperty* hpProperty = FindFieldChecked<FProperty>(UPugaCharacterAttributeSet::StaticClass(), GET_MEMBER_NAME_CHECKED(UPugaCharacterAttributeSet, Hp));
 
 	// hpProperty에 +50 더하기
 	AddModifier(GameplayEffect, hpProperty, EGameplayModOp::Additive, FScalableFloat(50.f));
@@ -157,7 +157,7 @@ void APugaCharacter::PostInitializeComponents()
 
 	if (AbilitySystemComponent)
 	{
-		AbilitySystemComponent->InitStats(UCharacterAttributeSet::StaticClass(), nullptr);
+		AbilitySystemComponent->InitStats(UPugaCharacterAttributeSet::StaticClass(), nullptr);
 	}
 }
 
