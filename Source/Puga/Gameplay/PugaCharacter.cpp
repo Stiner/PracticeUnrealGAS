@@ -11,7 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayAbilitySet.h"
-#include "PugaCharacterAttributeSet.h"
+#include "AttributeSet/PugaCharacterAttributeSet.h"
 
 
 APugaCharacter::APugaCharacter()
@@ -90,8 +90,9 @@ void TestGameplayEffect(UAbilitySystemComponent* AbilitySystemComponent)
 	GameplayEffect->DurationMagnitude     = FScalableFloat(10.f);
 	// 0.5초 주기마다
 	GameplayEffect->Period                = 1.0f;
+	// TODO : deprecated
 	// 100$ 확율로
-	GameplayEffect->ChanceToApplyToTarget = 1.f;
+	GameplayEffect->ChanceToApplyToTarget_DEPRECATED = 1.f;
 
 	FActiveGameplayEffectHandle recoverHpEffectHandle = AbilitySystemComponent->ApplyGameplayEffectToTarget(GameplayEffect, AbilitySystemComponent, 1.f);
 
